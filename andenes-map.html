@@ -296,6 +296,20 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+
+        // Password Protection
+        const SITE_PASSWORD = 'your-secure-password-here';  // 👈 Change this!
+        
+        // Check if already authenticated in this session
+        if (!sessionStorage.getItem('authenticated')) {
+            const enteredPassword = prompt('🔐 Enter password to access the map:');
+            if (enteredPassword !== SITE_PASSWORD) {
+                document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;"><div style="text-align:center;"><h1 style="color:#dc2626;font-size:3rem;">🚫</h1><h2>Access Denied</h2><p style="color:#666;">Invalid password</p></div></div>';
+                throw new Error('Access denied');
+            }
+            sessionStorage.setItem('authenticated', 'true');
+        }
+
         // ============================================
         // 🔧 CONFIGURATION - EDIT THESE VALUES
         // ============================================
@@ -447,11 +461,19 @@
         function createPopup(address) {
             const div = document.createElement('div');
             
+            // Google Street View URL
+            const streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${address.latitude},${address.longitude}`;
+            
             div.innerHTML = `
                 <div class="popup-address">${address.address}</div>
                 <div class="popup-coords">${address.latitude.toFixed(6)}, ${address.longitude.toFixed(6)}</div>
                 <div class="popup-status">
                     <strong>Status:</strong> <span id="current-status-${address.id}">${address.status}</span>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <a href="${streetViewUrl}" target="_blank" style="display: inline-block; background: #4285f4; color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: 500;">
+                        📍 View in Street View
+                    </a>
                 </div>
                 <div class="status-buttons">
                     <button class="status-btn incomplete ${address.status === 'Incomplete' ? 'active' : ''}" 
@@ -468,9 +490,10 @@
                     </button>
                 </div>
             `;
-
+        
             return div;
         }
+
 
         // Update address status
         window.updateStatus = async function(pageId, newStatus) {
