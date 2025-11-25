@@ -338,6 +338,9 @@
 
         // Load addresses from Notion via Cloudflare Worker
         async function loadAddresses() {
+            console.log('🔍 Attempting to connect to:', CONFIG.WORKER_URL);
+            console.log('🔍 Using Database ID:', CONFIG.DATABASE_ID);
+            
             const response = await fetch(`${CONFIG.WORKER_URL}/api/query-all`, {
                 method: 'POST',
                 headers: {
@@ -347,19 +350,29 @@
                     database_id: CONFIG.DATABASE_ID
                 })
             });
-
+        
+            console.log('🔍 Response status:', response.status);
+            console.log('🔍 Response ok:', response.ok);
+        
             if (!response.ok) {
-                throw new Error(`Failed to load addresses: ${response.statusText}. Check your Worker URL and Database ID in the HTML file.`);
+                const errorText = await response.text();
+                console.error('🔍 Error response:', errorText);
+                throw new Error(`Failed to load addresses: ${response.statusText}. Check console for details.`);
             }
-
+        
             const data = await response.json();
-            
-            if (data.error) {
-                throw new Error(data.error);
+            console.log('🔍 Full response data:', data);
+            console.log('🔍 Results array:', data.results);
+            console.log('🔍 First result:', data.results?.[0]);
+        
+            if (!data.results) {
+                throw new Error('No results field in response. Check Worker code.');
             }
-
-            allAddresses = data.results.map(page => {
+            
+            allAddresses = data.results.map((page, index) => {
+                console.log(`🔍 Processing page ${index}:`, page);
                 const props = page.properties;
+                console.log(`🔍 Properties for page ${index}:`, props);
                 
                 return {
                     id: page.id,
@@ -369,14 +382,15 @@
                     status: props.Status?.select?.name || 'Incomplete'
                 };
             }).filter(addr => addr.latitude && addr.longitude);
-
+        
             if (allAddresses.length === 0) {
-                throw new Error('No addresses found. Make sure your Notion database has Address, Latitude, Longitude, and Status columns.');
+                throw new Error('No addresses found. Check database has data and correct column names.');
             }
-
+        
             console.log(`✅ Loaded ${allAddresses.length} addresses`);
             updateStats();
         }
+
 
         // Initialize map
         function initMap() {
