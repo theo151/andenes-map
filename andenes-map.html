@@ -1416,54 +1416,58 @@
     }
 
     window.togglePriority = async function(pageId) {
-        try {
-            showLoading();
+            try {
+                showLoading();
 
-            const address = allAddresses.find(a => a.id === pageId);
-            if (!address) return;
+                const address = allAddresses.find(a => a.id === pageId);
+                if (!address) return;
 
-            if (address.status !== 'Incomplete') {
-                alert('High priority can only be set for incomplete addresses.');
+                if (address.status !== 'Incomplete') {
+                    alert('High priority can only be set for incomplete addresses.');
+                    hideLoading();
+                    return;
+                }
+
+                const newPriorityState = !address.highPriority;
+
+                const response = await fetch(`${CONFIG.WORKER_URL}/api/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        page_id: pageId,
+                        properties: { 'High Priority': { checkbox: newPriorityState } }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update priority');
+                }
+
+                address.highPriority = newPriorityState;
+                updateStats();
+
+                // Refresh all markers to update colors
+                const currentFilter = document.getElementById('status-filter').value;
+                if (currentFilter === 'all') {
+                    displayMarkers(allAddresses);
+                } else if (currentFilter === 'High Priority') {
+                    const filtered = allAddresses.filter(addr => addr.highPriority && addr.status === 'Incomplete');
+                    displayMarkers(filtered);
+                } else {
+                    const filtered = allAddresses.filter(addr => addr.status === currentFilter);
+                    displayMarkers(filtered);
+                }
+
+                // Close and reopen the popup to refresh it
+                map.closePopup();
+
+            } catch (error) {
+                console.error('Error updating priority:', error);
+                alert('Failed to update priority: ' + error.message);
+            } finally {
                 hideLoading();
-                return;
             }
-
-            const newPriorityState = !address.highPriority;
-
-            const response = await fetch(`${CONFIG.WORKER_URL}/api/update`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    page_id: pageId,
-                    properties: { 'High Priority': { checkbox: newPriorityState } }
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to update priority');
-            }
-
-            address.highPriority = newPriorityState;
-            updateStats();
-
-            const currentFilter = document.getElementById('status-filter').value;
-            if (currentFilter === 'all') {
-                displayMarkers(allAddresses);
-            } else if (currentFilter === 'High Priority') {
-                const filtered = allAddresses.filter(addr => addr.highPriority);
-                displayMarkers(filtered);
-            } else {
-                const filtered = allAddresses.filter(addr => addr.status === currentFilter);
-                displayMarkers(filtered);
-            }
-
-        } catch (error) {
-            console.error('Error updating priority:', error);
-            alert('Failed to update priority: ' + error.message);
-        } finally {
-            hideLoading();
         }
-    }
 
     function updateStats() {
         const total = allAddresses.length;
