@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -12,239 +13,710 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: #f5f5f7;
+    }
 
-        #controls {
-            background: white;
-            padding: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
+    #controls {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: saturate(180%) blur(20px);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+        padding: 0.875rem 1.25rem;
+        border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+        display: flex;
+        gap: 0.875rem;
+        align-items: center;
+        flex-wrap: wrap;
+        z-index: 1000;
+    }
 
-        #status-filter {
-            padding: 0.5rem 1rem;
-            border: 2px solid #667eea;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
+    .search-container {
+        position: relative;
+    }
 
-        #stats {
-            display: flex;
-            gap: 2rem;
-            margin-left: auto;
-        }
+    #search-box {
+        padding: 0.5rem 0.875rem;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.9375rem;
+        width: 260px;
+        height: 38px;
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+        transition: all 0.2s ease;
+    }
 
-        .stat {
-            text-align: center;
-        }
+    #search-box:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 0 4px rgba(0, 125, 250, 0.15);
+    }
 
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #667eea;
-        }
+    .search-results {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: saturate(180%) blur(20px);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+        border-radius: 12px;
+        max-height: 320px;
+        overflow-y: auto;
+        display: none;
+        z-index: 1000;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 0 0 0.5px rgba(0, 0, 0, 0.1);
+    }
 
-        .stat-label {
-            font-size: 0.8rem;
-            color: #666;
-        }
+    .search-results.show {
+        display: block;
+        animation: slideDown 0.2s ease-out;
+    }
 
-        #map {
-            flex: 1;
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
         }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
-        .leaflet-popup-content {
-            margin: 1rem;
-            min-width: 200px;
-        }
+    .search-result-item {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+        transition: background 0.15s ease;
+    }
 
-        .popup-address {
-            font-weight: bold;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            color: #333;
-        }
+    .search-result-item:hover {
+        background: rgba(0, 125, 250, 0.08);
+    }
 
-        .popup-coords {
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 1rem;
-        }
+    .search-result-item:last-child {
+        border-bottom: none;
+    }
 
-        .popup-status {
-            margin-bottom: 1rem;
-        }
+    .search-result-address {
+        font-weight: 500;
+        color: #1d1d1f;
+        font-size: 0.9375rem;
+    }
 
-        .status-buttons {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
+    .search-result-status {
+        font-size: 0.8125rem;
+        color: #86868b;
+        margin-top: 0.25rem;
+    }
 
-        .status-btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
+    #status-filter {
+        padding: 0.5rem 0.875rem;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.9375rem;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+        height: 38px;
+        width: 260px;
+        transition: all 0.2s ease;
+    }
 
-        .status-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
+    #status-filter:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 0 4px rgba(0, 125, 250, 0.15);
+    }
 
-        .status-btn.incomplete {
-            background: #fbbf24;
-            color: white;
-        }
+    #refresh-btn {
+        padding: 0;
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        color: #007aff;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.125rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 38px;
+        width: 38px;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
 
-        .status-btn.complete {
-            background: #10b981;
-            color: white;
-        }
+    #refresh-btn:hover {
+        background: rgba(255, 255, 255, 0.85);
+        transform: rotate(180deg);
+    }
 
-        .status-btn.in-progress {
-            background: #3b82f6;
-            color: white;
-        }
+    #refresh-btn:active {
+        transform: rotate(180deg) scale(0.95);
+    }
 
-        .status-btn.active {
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
-        }
+    #stats {
+        display: flex;
+        gap: 1.75rem;
+        margin-left: auto;
+    }
 
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.95);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        }
+    #leaderboard-btn {
+        padding: 0.5rem 1.125rem;
+        background: rgba(0, 122, 255, 0.12);
+        color: #007aff;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9375rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        height: 38px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
 
-        .loading-overlay.hidden {
-            display: none;
-        }
+    #leaderboard-btn:hover {
+        background: rgba(0, 122, 255, 0.18);
+        transform: scale(1.02);
+    }
 
-        .loading-content {
-            text-align: center;
-        }
+    #leaderboard-btn:active {
+        transform: scale(0.98);
+    }
 
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
+    .stat {
+        text-align: center;
+    }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1d1d1f;
+        letter-spacing: -0.5px;
+    }
 
-        .loading-text {
-            font-size: 1.1rem;
-            color: #333;
-        }
+    .stat-label {
+        font-size: 0.6875rem;
+        color: #86868b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 2px;
+        font-weight: 500;
+    }
 
-        .error-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10001;
-        }
+    #map {
+        flex: 1;
+        z-index: 1;
+    }
 
-        .error-overlay.hidden {
-            display: none;
-        }
+    /* Apple Glassmorphism Popup */
+    .leaflet-popup-content-wrapper {
+        background: rgba(255, 255, 255, 0.72);
+        backdrop-filter: saturate(180%) blur(30px);
+        -webkit-backdrop-filter: saturate(180%) blur(30px);
+        border-radius: 18px;
+        padding: 0;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25), 
+                    0 0 0 0.5px rgba(255, 255, 255, 0.5) inset;
+        border: 0.5px solid rgba(255, 255, 255, 0.18);
+    }
 
-        .error-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            max-width: 500px;
-            text-align: center;
-        }
+    .leaflet-popup-content {
+        margin: 0;
+        padding: 0;
+        width: 260px !important;
+        font-size: 0.9375rem;
+    }
 
-        .error-title {
-            color: #dc2626;
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
+    .leaflet-popup-tip {
+        background: rgba(255, 255, 255, 0.72);
+        backdrop-filter: saturate(180%) blur(30px);
+        -webkit-backdrop-filter: saturate(180%) blur(30px);
+        box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.18);
+    }
 
-        .error-message {
-            color: #666;
-            margin-bottom: 1.5rem;
-            line-height: 1.5;
-        }
+    .popup-header {
+        background: rgba(255, 255, 255, 0.3);
+        padding: 1rem;
+        border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+        border-radius: 18px 18px 0 0;
+    }
 
-        .error-btn {
-            background: #667eea;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            cursor: pointer;
-        }
+    .popup-address {
+        font-weight: 600;
+        font-size: 0.9375rem;
+        color: #1d1d1f;
+        margin-bottom: 0.375rem;
+        letter-spacing: -0.2px;
+    }
 
-        .error-btn:hover {
-            background: #5568d3;
-        }
+    .popup-coords {
+        font-size: 0.75rem;
+        color: #86868b;
+        font-weight: 500;
+    }
 
-        /* Marker colors based on status */
-        .marker-incomplete {
-            background-color: #fbbf24;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
+    .popup-body {
+        padding: 1rem;
+    }
 
-        .marker-complete {
-            background-color: #10b981;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
+    .popup-status-section {
+        margin-bottom: 1rem;
+    }
 
-        .marker-in-progress {
-            background-color: #3b82f6;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    .status-label {
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #86868b;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .current-status-badge {
+        display: inline-block;
+        padding: 0.375rem 0.75rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.8125rem;
+        letter-spacing: -0.1px;
+    }
+
+    .status-incomplete {
+        background: rgba(255, 204, 0, 0.2);
+        color: #c78500;
+    }
+
+    .status-in-progress {
+        background: rgba(0, 122, 255, 0.2);
+        color: #0066cc;
+    }
+
+    .status-complete {
+        background: rgba(52, 199, 89, 0.2);
+        color: #248a3d;
+    }
+
+    .priority-btn {
+        padding: 0.5rem 0.75rem;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        text-align: center;
+        width: 100%;
+        margin-bottom: 1rem;
+        letter-spacing: -0.1px;
+        background: rgba(0, 0, 0, 0.04);
+        color: #86868b;
+    }
+
+    .priority-btn:hover {
+        background: rgba(0, 0, 0, 0.08);
+        transform: scale(1.02);
+    }
+
+    .priority-btn:active {
+        transform: scale(0.98);
+    }
+
+    .priority-btn.active {
+        background: rgba(255, 59, 48, 0.15);
+        color: #d70015;
+    }
+
+    .priority-btn.active:hover {
+        background: rgba(255, 59, 48, 0.25);
+    }
+
+    .status-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .status-btn {
+        padding: 0.5rem;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        flex: 1;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.04);
+        color: #86868b;
+        letter-spacing: -0.1px;
+    }
+
+    .status-btn:hover {
+        background: rgba(0, 0, 0, 0.08);
+        transform: scale(1.02);
+    }
+
+    .status-btn:active {
+        transform: scale(0.98);
+    }
+
+    .status-btn.incomplete {
+        color: #c78500;
+    }
+
+    .status-btn.in-progress {
+        color: #0066cc;
+    }
+
+    .status-btn.complete {
+        color: #248a3d;
+    }
+
+    .status-btn.active {
+        background: rgba(0, 122, 255, 0.15);
+        color: #007aff;
+        font-weight: 700;
+    }
+
+    .status-btn.incomplete.active {
+        background: rgba(255, 204, 0, 0.15);
+        color: #c78500;
+    }
+
+    .status-btn.in-progress.active {
+        background: rgba(0, 122, 255, 0.15);
+        color: #0066cc;
+    }
+
+    .status-btn.complete.active {
+        background: rgba(52, 199, 89, 0.15);
+        color: #248a3d;
+    }
+
+    .external-links {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .external-link-btn {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 0.75rem;
+        background: rgba(0, 122, 255, 0.1);
+        border: none;
+        border-radius: 10px;
+        text-decoration: none;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #007aff;
+        transition: all 0.2s ease;
+        letter-spacing: -0.1px;
+    }
+
+    .external-link-btn:hover {
+        background: rgba(0, 122, 255, 0.18);
+        transform: scale(1.02);
+    }
+
+    .external-link-btn:active {
+        transform: scale(0.98);
+    }
+
+    /* Loading & Error - Apple Style */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(245, 245, 247, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    }
+
+    .loading-overlay.hidden {
+        display: none;
+    }
+
+    .spinner {
+        border: 3px solid rgba(0, 0, 0, 0.1);
+        border-top: 3px solid #007aff;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        animation: spin 1s ease-in-out infinite;
+        margin: 0 auto 1.25rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+        font-size: 0.9375rem;
+        color: #86868b;
+        font-weight: 500;
+    }
+
+    .error-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10001;
+    }
+
+    .error-overlay.hidden {
+        display: none;
+    }
+
+    .error-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: saturate(180%) blur(20px);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+        padding: 2rem;
+        border-radius: 20px;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .error-title {
+        color: #ff3b30;
+        font-size: 1.375rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        letter-spacing: -0.5px;
+    }
+
+    .error-message {
+        color: #86868b;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+        font-size: 0.9375rem;
+    }
+
+    .error-btn {
+        background: #007aff;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.9375rem;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .error-btn:hover {
+        background: #0051d5;
+        transform: scale(1.02);
+    }
+
+    .error-btn:active {
+        transform: scale(0.98);
+    }
+
+    /* Markers - Refined */
+    .marker-incomplete {
+        background-color: #ffcc00;
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        border: 2.5px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    .marker-complete {
+        background-color: #34c759;
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        border: 2.5px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    .marker-in-progress {
+        background-color: #007aff;
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        border: 2.5px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    .marker-high-priority {
+        background-color: #ff3b30;
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        border: 2.5px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Leaderboard - Apple Style */
+    .leaderboard-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 10002;
+    }
+
+    .leaderboard-overlay.show {
+        display: flex;
+        animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .leaderboard-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: saturate(180%) blur(20px);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+        border-radius: 20px;
+        max-width: 480px;
+        width: 90%;
+        max-height: 70vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
         }
-    </style>
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .leaderboard-header {
+        background: rgba(0, 0, 0, 0.02);
+        padding: 1.25rem;
+        text-align: center;
+        border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .leaderboard-title {
+        font-size: 1.375rem;
+        font-weight: 700;
+        color: #1d1d1f;
+        letter-spacing: -0.5px;
+    }
+
+    .leaderboard-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+
+    .leaderboard-item {
+        display: flex;
+        align-items: center;
+        padding: 0.875rem;
+        margin-bottom: 0.5rem;
+        background: rgba(0, 0, 0, 0.02);
+        border-radius: 12px;
+        transition: all 0.2s ease;
+    }
+
+    .leaderboard-item:hover {
+        background: rgba(0, 122, 255, 0.08);
+        transform: scale(1.02);
+    }
+
+    .leaderboard-rank {
+        font-size: 1.125rem;
+        font-weight: 700;
+        width: 44px;
+        text-align: center;
+        color: #86868b;
+        letter-spacing: -0.5px;
+    }
+
+    .rank-1 { color: #ffcc00; }
+    .rank-2 { color: #8e8e93; }
+    .rank-3 { color: #cd7f32; }
+
+    .leaderboard-name {
+        flex: 1;
+        font-weight: 600;
+        color: #1d1d1f;
+        font-size: 0.9375rem;
+        letter-spacing: -0.2px;
+    }
+
+    .leaderboard-score {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #007aff;
+        letter-spacing: -0.5px;
+    }
+
+    .close-leaderboard {
+        background: #007aff;
+        color: white;
+        padding: 0.875rem;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9375rem;
+        transition: all 0.2s ease;
+        border-radius: 0 0 20px 20px;
+    }
+
+    .close-leaderboard:hover {
+        background: #0051d5;
+    }
+
+    .close-leaderboard:active {
+        transform: scale(0.98);
+    }
+</style>
+
 </head>
 <body>
     <!-- Loading Overlay -->
@@ -255,226 +727,380 @@
         </div>
     </div>
 
-    <!-- Error Overlay -->
-    <div class="error-overlay hidden" id="error-overlay">
-        <div class="error-content">
-            <div class="error-title">⚠️ Connection Error</div>
-            <div class="error-message" id="error-text"></div>
-            <button class="error-btn" onclick="location.reload()">Retry</button>
+<!-- Error Overlay -->
+<div class="error-overlay hidden" id="error-overlay">
+    <div class="error-content">
+        <div class="error-title">⚠️ Connection Error</div>
+        <div class="error-message" id="error-text"></div>
+        <button class="error-btn" onclick="location.reload()">Retry</button>
+    </div>
+</div>
+
+<!-- Leaderboard Overlay -->
+<div class="leaderboard-overlay" id="leaderboard-overlay">
+    <div class="leaderboard-content">
+        <div class="leaderboard-header">
+            <div class="leaderboard-title">Artist Leaderboard</div>
+        </div>
+        <div class="leaderboard-list" id="leaderboard-list"></div>
+        <button class="close-leaderboard" onclick="document.getElementById('leaderboard-overlay').classList.remove('show')">
+            Close
+        </button>
+    </div>
+</div>
+
+<!-- Main App -->
+<div id="controls">
+    <div class="search-container">
+        <input 
+            type="text" 
+            id="search-box" 
+            placeholder="🔍 Search addresses..."
+            autocomplete="off"
+        >
+        <div class="search-results" id="search-results"></div>
+    </div>
+    
+    <select id="status-filter">
+        <option value="all">All Addresses</option>
+        <option value="Incomplete">Incomplete Only</option>
+        <option value="Complete">Complete Only</option>
+        <option value="In Progress">In Progress Only</option>
+        <option value="High Priority">High Priority Only</option>
+    </select>
+
+    <button id="refresh-btn" title="Refresh data">↻</button>
+
+    <div id="stats">
+        <button id="leaderboard-btn">Leaderboard</button>
+        <div class="stat">
+            <div class="stat-value" id="total-count">0</div>
+            <div class="stat-label">Total</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="incomplete-count">0</div>
+            <div class="stat-label">Incomplete</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="progress-count">0</div>
+            <div class="stat-label">WIP</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="complete-count">0</div>
+            <div class="stat-label">Complete</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="priority-count">0</div>
+            <div class="stat-label">Priority</div>
         </div>
     </div>
+</div>
+<div id="map"></div>
 
-    <!-- Main App -->
-    <div id="controls">
-        <select id="status-filter">
-            <option value="all">All Addresses</option>
-            <option value="Incomplete">Incomplete Only</option>
-            <option value="Complete">Complete Only</option>
-            <option value="In Progress">In Progress Only</option>
-        </select>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const CONFIG = {
+        WORKER_URL: 'https://andenes-map-api.theo-c02.workers.dev',
+        DATABASE_ID: '2b611be43c7d81d797a7f63b772e74c7'
+    };
+    
+    const SITE_PASSWORD = 'Tvilling';
+    let currentArtist = sessionStorage.getItem('artist');
 
-        <div id="stats">
-            <div class="stat">
-                <div class="stat-value" id="total-count">0</div>
-                <div class="stat-label">Total</div>
+    if (!sessionStorage.getItem('authenticated')) {
+        const modal = document.createElement('div');
+        modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;z-index:99999;';
+        modal.innerHTML = `
+            <div style="background:white;padding:2rem;border-radius:8px;max-width:360px;width:90%;">
+                <h2 style="margin-bottom:1.5rem;text-align:center;color:#111827;font-size:1.5rem;font-weight:600;">Andenes Digital Twin Map</h2>
+                <div style="margin-bottom:1rem;">
+                    <label style="display:block;margin-bottom:0.5rem;font-weight:500;color:#374151;font-size:0.875rem;">Artist Name</label>
+                    <input type="text" id="artist-input" placeholder="Enter your name" style="width:100%;padding:0.625rem;border:1px solid #d1d5db;border-radius:4px;font-size:0.875rem;">
+                </div>
+                <div style="margin-bottom:1.5rem;">
+                    <label style="display:block;margin-bottom:0.5rem;font-weight:500;color:#374151;font-size:0.875rem;">Password</label>
+                    <input type="password" id="password-input" placeholder="Enter password" style="width:100%;padding:0.625rem;border:1px solid #d1d5db;border-radius:4px;font-size:0.875rem;">
+                </div>
+                <button id="login-btn" style="width:100%;padding:0.625rem;background:#111827;color:white;border:none;border-radius:4px;font-size:0.875rem;font-weight:500;cursor:pointer;">Enter</button>
+                <div id="login-error" style="color:#dc2626;margin-top:1rem;text-align:center;font-size:0.875rem;display:none;"></div>
             </div>
-            <div class="stat">
-                <div class="stat-value" id="incomplete-count" style="color: #fbbf24;">0</div>
-                <div class="stat-label">Incomplete</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value" id="progress-count" style="color: #3b82f6;">0</div>
-                <div class="stat-label">In Progress</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value" id="complete-count" style="color: #10b981;">0</div>
-                <div class="stat-label">Complete</div>
-            </div>
-        </div>
-    </div>
-    <div id="map"></div>
+        `;
+        document.body.appendChild(modal);
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-
-        // Password Protection
-        const SITE_PASSWORD = 'Tvilling';
-        
-        // Check if already authenticated in this session
-        if (!sessionStorage.getItem('authenticated')) {
-            const enteredPassword = prompt('🔐 Enter password to access the map:');
-            if (enteredPassword !== SITE_PASSWORD) {
-                document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;"><div style="text-align:center;"><h1 style="color:#dc2626;font-size:3rem;">🚫</h1><h2>Access Denied</h2><p style="color:#666;">Invalid password</p></div></div>';
-                throw new Error('Access denied');
+        const handleLogin = () => {
+            const artistName = document.getElementById('artist-input').value.trim();
+            const password = document.getElementById('password-input').value;
+            
+            if (!artistName) {
+                document.getElementById('login-error').textContent = 'Please enter your name';
+                document.getElementById('login-error').style.display = 'block';
+                return;
             }
+            
+            if (password !== SITE_PASSWORD) {
+                document.getElementById('login-error').textContent = 'Invalid password';
+                document.getElementById('login-error').style.display = 'block';
+                return;
+            }
+            
             sessionStorage.setItem('authenticated', 'true');
+            sessionStorage.setItem('artist', artistName);
+            currentArtist = artistName;
+            document.body.removeChild(modal);
+            location.reload();
+        };
+
+        document.getElementById('login-btn').addEventListener('click', handleLogin);
+        document.getElementById('artist-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+        document.getElementById('password-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+        
+        throw new Error('Waiting for authentication');
+    }
+
+    let map;
+    let markers = [];
+    let allAddresses = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            await loadAddresses();
+            initMap();
+            hideLoading();
+        } catch (error) {
+            showError(error.message);
+        }
+    });
+
+    function showLoading() {
+        document.getElementById('loading-overlay').classList.remove('hidden');
+    }
+
+    function hideLoading() {
+        document.getElementById('loading-overlay').classList.add('hidden');
+    }
+
+    function showError(message) {
+        document.getElementById('error-text').textContent = message;
+        document.getElementById('error-overlay').classList.remove('hidden');
+        hideLoading();
+    }
+
+    async function loadAddresses() {
+        document.querySelector('.loading-text').textContent = 'Connecting to Notion...';
+        
+        const response = await fetch(`${CONFIG.WORKER_URL}/api/query-all`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ database_id: CONFIG.DATABASE_ID })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to load addresses: ${response.statusText}`);
         }
 
-        // ============================================
-        // 🔧 CONFIGURATION - EDIT THESE VALUES
-        // ============================================
-        const CONFIG = {
-            WORKER_URL: 'https://andenes-map-api.theo-c02.workers.dev',  // 👈 CHANGE THIS
-            DATABASE_ID: '2b611be43c7d81d797a7f63b772e74c7'  // 👈 CHANGE THIS
-        };
-        // ============================================
+        document.querySelector('.loading-text').textContent = 'Processing addresses...';
+        
+        const data = await response.json();
+        
+        if (!data.results) {
+            throw new Error('No results field in response.');
+        }
+        
+        allAddresses = data.results.map(page => {
+            const props = page.properties;
+            return {
+                id: page.id,
+                address: props.Name?.title?.[0]?.plain_text || 'Unknown',
+                latitude: props.Latitude?.number || 0,
+                longitude: props.Longitude?.number || 0,
+                status: props.Status?.select?.name || 'Incomplete',
+                artist: props.Artist?.rich_text?.[0]?.plain_text || null,
+                highPriority: props['High Priority']?.checkbox || false
+            };
+        }).filter(addr => addr.latitude && addr.longitude);
 
-        let map;
-        let markers = [];
-        let allAddresses = [];
+        if (allAddresses.length === 0) {
+            throw new Error('No addresses found.');
+        }
 
-        // Initialize app on page load
-        document.addEventListener('DOMContentLoaded', async () => {
+        updateStats();
+    }
+
+    function initMap() {
+        map = L.map('map').setView([69.31, 16.11], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        displayMarkers(allAddresses);
+
+        // Setup filter
+        document.getElementById('status-filter').addEventListener('change', (e) => {
+            const filterValue = e.target.value;
+            if (filterValue === 'all') {
+                displayMarkers(allAddresses);
+            } else if (filterValue === 'High Priority') {
+                const filtered = allAddresses.filter(addr => addr.highPriority);
+                displayMarkers(filtered);
+            } else {
+                const filtered = allAddresses.filter(addr => addr.status === filterValue);
+                displayMarkers(filtered);
+            }
+        });
+
+        // Setup search
+        const searchBox = document.getElementById('search-box');
+        const searchResults = document.getElementById('search-results');
+        
+        searchBox.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            if (searchTerm === '') {
+                searchResults.classList.remove('show');
+                searchResults.innerHTML = '';
+                return;
+            }
+            
+            const filtered = allAddresses.filter(addr => 
+                addr.address.toLowerCase().includes(searchTerm)
+            ).slice(0, 10);
+            
+            if (filtered.length === 0) {
+                searchResults.innerHTML = '<div class="search-result-item" style="color:#6b7280;">No results found</div>';
+                searchResults.classList.add('show');
+                return;
+            }
+            
+            const resultsHtml = filtered.map(addr => {
+                const statusColor = addr.status === 'Complete' ? '#10b981' : addr.status === 'In Progress' ? '#3b82f6' : '#fbbf24';
+                const priorityBadge = addr.highPriority ? ' <span style="color:#dc2626;font-weight:600;">⚠ PRIORITY</span>' : '';
+                return `
+                    <div class="search-result-item" data-lat="${addr.latitude}" data-lng="${addr.longitude}">
+                        <div class="search-result-address">${addr.address}</div>
+                        <div class="search-result-status">
+                            <span style="color:${statusColor};">● ${addr.status}</span>${priorityBadge}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            searchResults.innerHTML = resultsHtml;
+            searchResults.classList.add('show');
+            
+            searchResults.querySelectorAll('.search-result-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const lat = parseFloat(item.getAttribute('data-lat'));
+                    const lng = parseFloat(item.getAttribute('data-lng'));
+                    
+                    map.setView([lat, lng], 17);
+                    
+                    const marker = markers.find(m => {
+                        const markerLatLng = m.getLatLng();
+                        return markerLatLng.lat === lat && markerLatLng.lng === lng;
+                    });
+                    
+                    if (marker) {
+                        marker.openPopup();
+                    }
+                    
+                    searchResults.classList.remove('show');
+                    searchBox.value = '';
+                });
+            });
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!searchBox.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.classList.remove('show');
+            }
+        });
+
+        // Setup leaderboard
+        document.getElementById('leaderboard-btn').addEventListener('click', () => {
+            showLeaderboard();
+        });
+
+        // Setup refresh
+        document.getElementById('refresh-btn').addEventListener('click', async () => {
             try {
+                showLoading();
                 await loadAddresses();
-                initMap();
+                displayMarkers(allAddresses);
                 hideLoading();
             } catch (error) {
                 showError(error.message);
             }
         });
+    }
 
-        // Show/hide loading overlay
-        function showLoading() {
-            document.getElementById('loading-overlay').classList.remove('hidden');
-        }
+    function displayMarkers(addresses) {
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
 
-        function hideLoading() {
-            document.getElementById('loading-overlay').classList.add('hidden');
-        }
-
-        // Show error overlay
-        function showError(message) {
-            document.getElementById('error-text').textContent = message;
-            document.getElementById('error-overlay').classList.remove('hidden');
-            hideLoading();
-        }
-
-        // Load addresses from Notion via Cloudflare Worker
-        async function loadAddresses() {
-            console.log('🔍 Attempting to connect to:', CONFIG.WORKER_URL);
-            console.log('🔍 Using Database ID:', CONFIG.DATABASE_ID);
+        addresses.forEach(address => {
+            let markerClass;
+            if (address.highPriority && address.status === 'Incomplete') {
+                markerClass = 'marker-high-priority';
+            } else {
+                markerClass = `marker-${address.status.toLowerCase().replace(' ', '-')}`;
+            }
             
-            const response = await fetch(`${CONFIG.WORKER_URL}/api/query-all`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    database_id: CONFIG.DATABASE_ID
+            const marker = L.marker([address.latitude, address.longitude], {
+                icon: L.divIcon({
+                    className: markerClass,
+                    iconSize: [10, 10]
                 })
             });
+
+            const popupContent = createPopup(address);
+            marker.bindPopup(popupContent, { maxWidth: 240 });
+
+            marker.addTo(map);
+            markers.push(marker);
+        });
+    }
+
+    function createPopup(address) {
+        const div = document.createElement('div');
         
-            console.log('🔍 Response status:', response.status);
-            console.log('🔍 Response ok:', response.ok);
+        const streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${address.latitude},${address.longitude}`;
         
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('🔍 Error response:', errorText);
-                throw new Error(`Failed to load addresses: ${response.statusText}. Check console for details.`);
-            }
+        // Simple UTM conversion approximation
+        const utmY = (address.latitude * 111000).toFixed(2);
+        const utmX = (address.longitude * 111000 * Math.cos(address.latitude * Math.PI / 180)).toFixed(2);
+        const norgeskartUrl = `https://norgeskart.no/#!?project=norgeskart&layers=1002&zoom=14&lat=${utmY}&lon=${utmX}&markerLat=${utmY}&markerLon=${utmX}&sok=${encodeURIComponent(address.address)}`;
         
-            const data = await response.json();
-            console.log('🔍 Full response data:', data);
-            console.log('🔍 Results array:', data.results);
-            console.log('🔍 First result:', data.results?.[0]);
+        const statusClass = `status-${address.status.toLowerCase().replace(' ', '-')}`;
         
-            if (!data.results) {
-                throw new Error('No results field in response. Check Worker code.');
-            }
-            
-            allAddresses = data.results.map((page, index) => {
-                console.log(`🔍 Processing page ${index}:`, page);
-                const props = page.properties;
-                console.log(`🔍 Properties for page ${index}:`, props);
-                
-                return {
-                    id: page.id,
-                    address: props.Address?.title?.[0]?.plain_text || 'Unknown',
-                    latitude: props.Latitude?.number || 0,
-                    longitude: props.Longitude?.number || 0,
-                    status: props.Status?.select?.name || 'Incomplete'
-                };
-            }).filter(addr => addr.latitude && addr.longitude);
+        const showPriorityButton = address.status === 'Incomplete';
+        const priorityButtonHtml = showPriorityButton ? `
+            <button class="priority-btn ${address.highPriority ? 'active' : ''}" 
+                    onclick="togglePriority('${address.id}')">
+                ${address.highPriority ? 'HIGH PRIORITY' : 'Mark Priority'}
+            </button>
+        ` : '';
         
-            if (allAddresses.length === 0) {
-                throw new Error('No addresses found. Check database has data and correct column names.');
-            }
-        
-            console.log(`✅ Loaded ${allAddresses.length} addresses`);
-            updateStats();
-        }
-
-
-        // Initialize map
-        function initMap() {
-            // Create map centered on Andenes
-            map = L.map('map').setView([69.31, 16.11], 13);
-
-            // Add OpenStreetMap tiles
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors',
-                maxZoom: 19
-            }).addTo(map);
-
-            // Add all markers
-            displayMarkers(allAddresses);
-
-            // Setup filter
-            document.getElementById('status-filter').addEventListener('change', (e) => {
-                const filterValue = e.target.value;
-                if (filterValue === 'all') {
-                    displayMarkers(allAddresses);
-                } else {
-                    const filtered = allAddresses.filter(addr => addr.status === filterValue);
-                    displayMarkers(filtered);
-                }
-            });
-        }
-
-        // Display markers on map
-        function displayMarkers(addresses) {
-            // Clear existing markers
-            markers.forEach(marker => map.removeLayer(marker));
-            markers = [];
-
-            // Add new markers
-            addresses.forEach(address => {
-                const markerClass = `marker-${address.status.toLowerCase().replace(' ', '-')}`;
-                
-                const marker = L.marker([address.latitude, address.longitude], {
-                    icon: L.divIcon({
-                        className: markerClass,
-                        iconSize: [12, 12]
-                    })
-                }).addTo(map);
-
-                // Create popup
-                const popupContent = createPopup(address);
-                marker.bindPopup(popupContent);
-
-                markers.push(marker);
-            });
-        }
-
-        // Create popup content
-        function createPopup(address) {
-            const div = document.createElement('div');
-            
-            // Google Street View URL
-            const streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${address.latitude},${address.longitude}`;
-            
-            div.innerHTML = `
+        div.innerHTML = `
+            <div class="popup-header">
                 <div class="popup-address">${address.address}</div>
                 <div class="popup-coords">${address.latitude.toFixed(6)}, ${address.longitude.toFixed(6)}</div>
-                <div class="popup-status">
-                    <strong>Status:</strong> <span id="current-status-${address.id}">${address.status}</span>
+            </div>
+            <div class="popup-body">
+                <div class="popup-status-section">
+                    <div class="status-label">Status</div>
+                    <div class="current-status-badge ${statusClass}" id="current-status-${address.id}">
+                        ${address.status}
+                    </div>
                 </div>
-                <div style="margin-bottom: 1rem;">
-                    <a href="${streetViewUrl}" target="_blank" style="display: inline-block; background: #4285f4; color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: 500;">
-                        📍 View in Street View
-                    </a>
-                </div>
+                
+                ${priorityButtonHtml}
+                
                 <div class="status-buttons">
                     <button class="status-btn incomplete ${address.status === 'Incomplete' ? 'active' : ''}" 
                             onclick="updateStatus('${address.id}', 'Incomplete')">
@@ -482,91 +1108,177 @@
                     </button>
                     <button class="status-btn in-progress ${address.status === 'In Progress' ? 'active' : ''}" 
                             onclick="updateStatus('${address.id}', 'In Progress')">
-                        In Progress
+                        WIP
                     </button>
                     <button class="status-btn complete ${address.status === 'Complete' ? 'active' : ''}" 
                             onclick="updateStatus('${address.id}', 'Complete')">
                         Complete
                     </button>
                 </div>
-            `;
-        
-            return div;
-        }
+                
+                <div class="external-links">
+                    <a href="${streetViewUrl}" target="_blank" class="external-link-btn">Street View</a>
+                    <a href="${norgeskartUrl}" target="_blank" class="external-link-btn">Norgeskart</a>
+                </div>
+            </div>
+        `;
 
+        return div;
+    }
 
-        // Update address status
-        window.updateStatus = async function(pageId, newStatus) {
-            try {
-                showLoading();
+    window.updateStatus = async function(pageId, newStatus) {
+        try {
+            showLoading();
 
-                const response = await fetch(`${CONFIG.WORKER_URL}/api/update`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        page_id: pageId,
-                        properties: {
-                            Status: {
-                                select: {
-                                    name: newStatus
-                                }
-                            }
-                        }
-                    })
-                });
+            const properties = {
+                Status: { select: { name: newStatus } },
+                Artist: { rich_text: [{ text: { content: currentArtist || 'Unknown' } }] }
+            };
 
-                if (!response.ok) {
-                    throw new Error('Failed to update status');
-                }
-
-                // Update local data
-                const address = allAddresses.find(a => a.id === pageId);
-                if (address) {
-                    address.status = newStatus;
-                }
-
-                // Update UI
-                const statusSpan = document.getElementById(`current-status-${pageId}`);
-                if (statusSpan) {
-                    statusSpan.textContent = newStatus;
-                }
-
-                // Update stats
-                updateStats();
-
-                // Refresh markers to update colors
-                const currentFilter = document.getElementById('status-filter').value;
-                if (currentFilter === 'all') {
-                    displayMarkers(allAddresses);
-                } else {
-                    const filtered = allAddresses.filter(addr => addr.status === currentFilter);
-                    displayMarkers(filtered);
-                }
-
-                console.log(`✅ Updated ${pageId} to ${newStatus}`);
-
-            } catch (error) {
-                console.error('Error updating status:', error);
-                alert('Failed to update status: ' + error.message);
-            } finally {
-                hideLoading();
+            if (newStatus !== 'Incomplete') {
+                properties['High Priority'] = { checkbox: false };
             }
-        }
 
-        // Update statistics
-        function updateStats() {
-            const total = allAddresses.length;
-            const incomplete = allAddresses.filter(a => a.status === 'Incomplete').length;
-            const inProgress = allAddresses.filter(a => a.status === 'In Progress').length;
-            const complete = allAddresses.filter(a => a.status === 'Complete').length;
+            const response = await fetch(`${CONFIG.WORKER_URL}/api/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ page_id: pageId, properties: properties })
+            });
 
-            document.getElementById('total-count').textContent = total;
-            document.getElementById('incomplete-count').textContent = incomplete;
-            document.getElementById('progress-count').textContent = inProgress;
-            document.getElementById('complete-count').textContent = complete;
+            if (!response.ok) {
+                throw new Error('Failed to update status');
+            }
+
+            const address = allAddresses.find(a => a.id === pageId);
+            if (address) {
+                address.status = newStatus;
+                address.artist = currentArtist;
+                if (newStatus !== 'Incomplete') {
+                    address.highPriority = false;
+                }
+            }
+
+            const statusSpan = document.getElementById(`current-status-${pageId}`);
+            if (statusSpan) {
+                statusSpan.textContent = newStatus;
+                statusSpan.className = `current-status-badge status-${newStatus.toLowerCase().replace(' ', '-')}`;
+            }
+
+            updateStats();
+
+            const currentFilter = document.getElementById('status-filter').value;
+            if (currentFilter === 'all') {
+                displayMarkers(allAddresses);
+            } else if (currentFilter === 'High Priority') {
+                const filtered = allAddresses.filter(addr => addr.highPriority);
+                displayMarkers(filtered);
+            } else {
+                const filtered = allAddresses.filter(addr => addr.status === currentFilter);
+                displayMarkers(filtered);
+            }
+
+        } catch (error) {
+            console.error('Error updating status:', error);
+            alert('Failed to update status: ' + error.message);
+        } finally {
+            hideLoading();
         }
-    </script>
+    }
+
+    window.togglePriority = async function(pageId) {
+        try {
+            showLoading();
+
+            const address = allAddresses.find(a => a.id === pageId);
+            if (!address) return;
+
+            if (address.status !== 'Incomplete') {
+                alert('High priority can only be set for incomplete addresses.');
+                hideLoading();
+                return;
+            }
+
+            const newPriorityState = !address.highPriority;
+
+            const response = await fetch(`${CONFIG.WORKER_URL}/api/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    page_id: pageId,
+                    properties: { 'High Priority': { checkbox: newPriorityState } }
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update priority');
+            }
+
+            address.highPriority = newPriorityState;
+            updateStats();
+
+            const currentFilter = document.getElementById('status-filter').value;
+            if (currentFilter === 'all') {
+                displayMarkers(allAddresses);
+            } else if (currentFilter === 'High Priority') {
+                const filtered = allAddresses.filter(addr => addr.highPriority);
+                displayMarkers(filtered);
+            } else {
+                const filtered = allAddresses.filter(addr => addr.status === currentFilter);
+                displayMarkers(filtered);
+            }
+
+        } catch (error) {
+            console.error('Error updating priority:', error);
+            alert('Failed to update priority: ' + error.message);
+        } finally {
+            hideLoading();
+        }
+    }
+
+    function updateStats() {
+        const total = allAddresses.length;
+        const incomplete = allAddresses.filter(a => a.status === 'Incomplete').length;
+        const inProgress = allAddresses.filter(a => a.status === 'In Progress').length;
+        const complete = allAddresses.filter(a => a.status === 'Complete').length;
+        const priority = allAddresses.filter(a => a.highPriority).length;
+
+        document.getElementById('total-count').textContent = total;
+        document.getElementById('incomplete-count').textContent = incomplete;
+        document.getElementById('progress-count').textContent = inProgress;
+        document.getElementById('complete-count').textContent = complete;
+        document.getElementById('priority-count').textContent = priority;
+    }
+
+    function showLeaderboard() {
+        const artistStats = {};
+        
+        allAddresses.forEach(addr => {
+            if (addr.status === 'Complete' && addr.artist) {
+                artistStats[addr.artist] = (artistStats[addr.artist] || 0) + 1;
+            }
+        });
+        
+        const sorted = Object.entries(artistStats)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10);
+        
+        const listHtml = sorted.map(([artist, count], index) => {
+            const rank = index + 1;
+            const rankClass = `rank-${rank <= 3 ? rank : ''}`;
+            
+            return `
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank ${rankClass}">#${rank}</div>
+                    <div class="leaderboard-name">${artist}</div>
+                    <div class="leaderboard-score">${count}</div>
+                </div>
+            `;
+        }).join('');
+        
+        document.getElementById('leaderboard-list').innerHTML = listHtml || '<p style="text-align:center;color:#6b7280;padding:2rem;font-size:0.875rem;">No completions yet!</p>';
+        document.getElementById('leaderboard-overlay').classList.add('show');
+    }
+</script>
+
 </body>
 </html>
