@@ -1270,28 +1270,29 @@
     }
 
     function displayMarkers(addresses) {
-                markers.forEach(marker => map.removeLayer(marker));
-                markers = [];
-                
-                addresses.forEach(address => {
-                    let markerClass;
-                    if (address.highPriority && address.status === 'Incomplete') {
-                        markerClass = 'marker-high-priority';
-                    } else {
-                        markerClass = `marker-${address.status.toLowerCase().replace(' ', '-')}`;
-                    }
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+
+            addresses.forEach(address => {
+                let markerClass;
+                if (address.highPriority && address.status === 'Incomplete') {
+                    markerClass = 'marker-high-priority';
+                } else {
+                    markerClass = `marker-${address.status.toLowerCase().replace(' ', '-')}`;
+                }
                 
                 const marker = L.marker([address.latitude, address.longitude], {
                     icon: L.divIcon({
                         className: markerClass,
                         iconSize: [20, 20],
-                        iconAnchor: [10, 10]
+                        iconAnchor: [10, 10],
+                        html: '<div style="width:14px;height:14px;margin:3px;border-radius:50%;"></div>'
                     })
                 });
-                
+
                 const popupContent = createPopup(address);
                 marker.bindPopup(popupContent, { maxWidth: 280 });
-                
+
                 marker.addTo(map);
                 markers.push(marker);
             });
